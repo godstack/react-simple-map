@@ -64,6 +64,7 @@ const Map = ({ setContent }) => {
   });
 
   const [current, setCurrent] = useState(0);
+  const [hoveredStateId, setHoveredStateId] = useState(null);
 
   const onGeographyClick = geo => {
     for (const [key, value] of Object.entries(brands)) {
@@ -166,8 +167,35 @@ const Map = ({ setContent }) => {
                         }
                       }}
                       onClick={() => onGeographyClick(geo)}
+                      onMouseOver={() => {
+                        //
+                        setHoveredStateId(geo.id);
+                        setContent(geo.properties.name);
+                      }}
+                      onMouseOut={() => {
+                        //
+                        setHoveredStateId(null);
+                        setContent('');
+                      }}
                     />
                   ))}
+
+                  {geographies.map(geo => {
+                    if (hoveredStateId !== geo.id) return null;
+                    const centroid = geoCentroid(geo);
+
+                    return (
+                      <g key={geo.rsmKey + '-name'}>
+                        {centroid[0] > -160 && centroid[0] < -67 && (
+                          <Marker coordinates={centroid} key={geo.id}>
+                            <text y='2' fontSize={14} textAnchor='middle'>
+                              {geo.properties.name}
+                            </text>
+                          </Marker>
+                        )}
+                      </g>
+                    );
+                  })}
 
                   {markers.map(({ name, coordinates, markerOffset }) => (
                     <Marker
